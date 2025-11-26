@@ -17,8 +17,11 @@ export async function GET(req: NextRequest) {
   const REDIRECT_URI = process.env.ESU_REDIRECT_URI?.trim()
   if (!APP_ID || !CONFIG_ID || !REDIRECT_URI) {
     return NextResponse.json(
-      { error: 'Missing FB_APP_ID / FB_LOGIN_BUSINESS_CONFIG_ID / ESU_REDIRECT_URI' },
-      { status: 500 }
+      {
+        error:
+          'Missing FB_APP_ID / FB_LOGIN_BUSINESS_CONFIG_ID / ESU_REDIRECT_URI',
+      },
+      { status: 500 },
     )
   }
 
@@ -26,9 +29,16 @@ export async function GET(req: NextRequest) {
   const tenantId = url.searchParams.get('tenant') || 'default'
   const returnOrigin = url.searchParams.get('origin') || ''
 
-  const payload = { tenantId, returnOrigin, ts: Date.now(), nonce: crypto.randomUUID() }
+  const payload = {
+    tenantId,
+    returnOrigin,
+    ts: Date.now(),
+    nonce: crypto.randomUUID(),
+  }
   const { raw, sig } = sign(payload)
-  const state = Buffer.from(JSON.stringify({ raw, sig })).toString('base64url')
+  const state = Buffer.from(JSON.stringify({ raw, sig })).toString(
+    'base64url',
+  )
 
   const esu =
     `https://www.facebook.com/v20.0/dialog/oauth` +

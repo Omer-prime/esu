@@ -15,15 +15,24 @@ export async function GET(req: NextRequest) {
   const APP_ID = process.env.FB_APP_ID?.trim()
   const CONFIG_ID = process.env.FB_LOGIN_BUSINESS_CONFIG_ID?.trim()
   const REDIRECT_URI = process.env.ESU_REDIRECT_URI?.trim()
-  if (!APP_ID || !CONFIG_ID || !REDIRECT_URI) return NextResponse.json({ error: 'env missing' }, { status: 500 })
+  if (!APP_ID || !CONFIG_ID || !REDIRECT_URI) {
+    return NextResponse.json({ error: 'env missing' }, { status: 500 })
+  }
 
   const u = new URL(req.url)
   const tenantId = u.searchParams.get('tenant') || 'default'
   const returnOrigin = u.searchParams.get('origin') || ''
 
-  const payload = { tenantId, returnOrigin, ts: Date.now(), nonce: crypto.randomUUID() }
+  const payload = {
+    tenantId,
+    returnOrigin,
+    ts: Date.now(),
+    nonce: crypto.randomUUID(),
+  }
   const { raw, sig } = sign(payload)
-  const state = Buffer.from(JSON.stringify({ raw, sig })).toString('base64url')
+  const state = Buffer.from(JSON.stringify({ raw, sig })).toString(
+    'base64url',
+  )
 
   const esu =
     `https://www.facebook.com/v20.0/dialog/oauth` +
@@ -32,5 +41,6 @@ export async function GET(req: NextRequest) {
     `&config_id=${CONFIG_ID}` +
     `&state=${state}`
 
+  // This endpoint directly redirects (vs /link which returns JSON {url})
   return NextResponse.redirect(esu, { status: 302 })
 }
