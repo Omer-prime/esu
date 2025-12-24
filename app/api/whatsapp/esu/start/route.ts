@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
     ts: Date.now(),
     nonce: crypto.randomUUID(),
   }
+
   const { raw, sig } = sign(payload)
   const state = Buffer.from(JSON.stringify({ raw, sig })).toString('base64url')
 
@@ -45,6 +46,7 @@ export async function GET(req: NextRequest) {
     `?client_id=${encodeURIComponent(APP_ID)}` +
     `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
     `&config_id=${encodeURIComponent(CONFIG_ID)}` +
+    `&response_type=code` + // 👈 force code flow
     `&scope=${encodeURIComponent(scopes)}` +
     `&state=${state}`
 
